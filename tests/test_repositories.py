@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.repositories.base import BaseRepository
 from app.models.user import User
@@ -153,18 +153,24 @@ def test_base_repository_delete(test_db):
     session.close()
 
 def test_create_user(test_db):
-    user = User(
-        name="Test User",
-        email="test@example.com",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-    test_db.add(user)
-    test_db.commit()
-    test_db.refresh(user)
+    Session = sessionmaker(bind=test_db)
+    session = Session()
     
-    assert user.id is not None
-    assert user.name == "Test User"
-    assert user.email == "test@example.com"
-    assert user.created_at is not None
-    assert user.updated_at is not None 
+    try:
+        user = User(
+            name="Test User",
+            email="test@example.com",
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        
+        assert user.id is not None
+        assert user.name == "Test User"
+        assert user.email == "test@example.com"
+        assert user.created_at is not None
+        assert user.updated_at is not None
+    finally:
+        session.close() 
