@@ -1,7 +1,7 @@
 # FastAPI Microservice
 
-[![Tests](https://github.com/[username]/[repository]/actions/workflows/test.yml/badge.svg)](https://github.com/[username]/[repository]/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/[username]/[repository]/branch/main/graph/badge.svg)](https://codecov.io/gh/[username]/[repository])
+[![Tests](https://github.com/brunoniconeves/pythonFastAPIScafoldingProject/actions/workflows/test.yml/badge.svg)](https://github.com/brunoniconeves/pythonFastAPIScafoldingProject/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/brunoniconeves/pythonFastAPIScafoldingProject/branch/main/graph/badge.svg)](https://codecov.io/gh/brunoniconeves/pythonFastAPIScafoldingProject)
 
 A well-structured FastAPI microservice with proper configuration management, database handling, and comprehensive test coverage.
 
@@ -33,8 +33,8 @@ A well-structured FastAPI microservice with proper configuration management, dat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/[username]/[repository].git
-cd [repository]
+git clone https://github.com/brunoniconeves/pythonFastAPIScafoldingProject.git
+cd pythonFastAPIScafoldingProject
 ```
 
 2. Install dependencies:
