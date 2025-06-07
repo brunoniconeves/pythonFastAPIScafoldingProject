@@ -1,10 +1,11 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 from app.repositories.base import BaseRepository
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 def test_base_repository_create(test_db):
     """
@@ -149,4 +150,12 @@ def test_base_repository_delete(test_db):
     result = repo.delete(999)
     assert result is False
     
-    session.close() 
+    session.close()
+
+def test_create_user(session: Session):
+    user = User(
+        name="Test User",
+        email="test@example.com",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    ) 
