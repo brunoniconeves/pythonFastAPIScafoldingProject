@@ -15,6 +15,8 @@ A well-structured FastAPI microservice with proper configuration management, dat
 - Comprehensive test suite with 100% coverage
 - GitHub Actions CI pipeline
 - Codecov integration
+- Docker support with multi-stage builds
+- Database migrations with Alembic
 
 ## Project Structure
 
@@ -41,16 +43,24 @@ A well-structured FastAPI microservice with proper configuration management, dat
 │   │   └── user_service.py
 │   ├── db.py            # Database configuration
 │   └── main.py          # Application entry point
+├── alembic/             # Database migrations
+│   ├── versions/        # Migration versions
+│   └── env.py          # Alembic configuration
 ├── tests/               # Test suite
 │   ├── test_config.py   # Configuration tests
 │   ├── test_health.py   # Health check endpoint tests
 │   ├── test_repositories.py  # Repository layer tests
 │   ├── test_services.py     # Service layer tests
 │   └── test_users.py        # User endpoints tests
+├── scripts/             # Utility scripts
+│   └── init.sh         # Container initialization script
 ├── .coveragerc          # Coverage configuration
 ├── codecov.yml          # Codecov configuration
 ├── pytest.ini          # Pytest configuration
 ├── requirements.txt    # Project dependencies
+├── alembic.ini        # Alembic configuration
+├── Dockerfile         # Docker build instructions
+├── docker-compose.yml # Docker Compose configuration
 └── README.md          # Project documentation
 ```
 
@@ -69,41 +79,88 @@ cd pythonFastAPIScafoldingProject
 pip install -r requirements.txt
 ```
 
-3. Run the tests:
+3. Run the database migrations:
+```bash
+python -m alembic upgrade head
+```
+
+4. Run the tests:
 ```bash
 pytest --cov=app --cov-report=term-missing
 ```
 
-4. Start the server:
+5. Start the server:
 ```bash
 uvicorn app.main:app --reload
 ```
 
 ### Docker Setup
 
+The application can be run using Docker, which provides an isolated environment with all necessary dependencies.
+
+#### Prerequisites
+- Docker installed on your system
+- Docker Compose installed on your system
+
+#### Running with Docker Compose (Recommended)
+
 1. Build and start the container:
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-2. Or run with Docker directly:
-```bash
-# Build the image
-docker build -t fastapi-microservice .
-
-# Run the container
-docker run -p 8000:8000 -v $(pwd)/data:/app/data fastapi-microservice
-```
+This command will:
+- Build the Docker image using multi-stage builds for optimization
+- Create and initialize the SQLite database
+- Run database migrations automatically
+- Start the FastAPI application
+- Enable automatic restarts on failure
+- Mount a volume for persistent database storage
 
 The API will be available at http://localhost:8000
 
-#### Docker Features
-- Multi-stage build for minimal image size
-- Non-root user for security
-- Volume mounting for persistent data
-- Health checks
-- Automatic restarts
-- Environment variable configuration
+To stop the container:
+```bash
+docker compose down
+```
+
+#### Running with Docker Directly
+
+Alternatively, you can run the container using Docker commands:
+
+1. Build the image:
+```bash
+docker build -t fastapi-microservice .
+```
+
+2. Run the container:
+```bash
+docker run -p 8000:8000 -v $(pwd)/data:/app/data fastapi-microservice
+```
+
+#### Docker Configuration Features
+- **Multi-stage builds**: Optimized image size
+- **Non-root user**: Enhanced security
+- **Volume mounting**: Persistent database storage in `./data`
+- **Health checks**: Automatic container health monitoring
+- **Automatic restarts**: Container recovers from failures
+- **Environment variables**: Configurable through Docker Compose
+
+#### Accessing Logs
+To view container logs:
+```bash
+# Follow logs in real-time
+docker compose logs -f
+
+# View specific number of lines
+docker compose logs --tail=100
+```
+
+#### Database Management
+The SQLite database is persisted in the `./data` directory. To reset the database:
+1. Stop the containers: `docker compose down`
+2. Delete the database file: `rm data/app.db`
+3. Restart the containers: `docker compose up --build`
 
 ## API Documentation
 
