@@ -9,7 +9,9 @@ A well-structured FastAPI microservice with proper configuration management, dat
 
 - FastAPI-based REST API
 - SQLAlchemy with SQLite database
-- Pydantic for data validation
+- Pydantic for data validation and settings management
+- Repository pattern for data access
+- Service layer for business logic
 - Comprehensive test suite with 100% coverage
 - GitHub Actions CI pipeline
 - Codecov integration
@@ -18,15 +20,38 @@ A well-structured FastAPI microservice with proper configuration management, dat
 
 ```
 .
+├── .github/
+│   └── workflows/          # GitHub Actions workflows
+│       └── test.yml       # CI pipeline configuration
 ├── app/
-│   ├── core/           # Core functionality (config, etc.)
-│   ├── models/         # SQLAlchemy models
-│   ├── repositories/   # Data access layer
-│   ├── routers/        # API endpoints
-│   ├── schemas/        # Pydantic models
-│   └── services/       # Business logic
-├── tests/              # Test suite
-└── requirements.txt    # Project dependencies
+│   ├── core/              # Core functionality
+│   │   └── config.py      # Application configuration
+│   ├── models/            # SQLAlchemy models
+│   │   └── user.py       # User model definition
+│   ├── repositories/      # Data access layer
+│   │   ├── base.py       # Base repository with common operations
+│   │   └── user_repository.py
+│   ├── routers/          # API endpoints
+│   │   ├── system.py     # System endpoints (health, config)
+│   │   └── users.py      # User endpoints
+│   ├── schemas/          # Pydantic models
+│   │   ├── system.py     # System-related schemas
+│   │   └── user.py       # User-related schemas
+│   ├── services/         # Business logic layer
+│   │   └── user_service.py
+│   ├── db.py            # Database configuration
+│   └── main.py          # Application entry point
+├── tests/               # Test suite
+│   ├── test_config.py   # Configuration tests
+│   ├── test_health.py   # Health check endpoint tests
+│   ├── test_repositories.py  # Repository layer tests
+│   ├── test_services.py     # Service layer tests
+│   └── test_users.py        # User endpoints tests
+├── .coveragerc          # Coverage configuration
+├── codecov.yml          # Codecov configuration
+├── pytest.ini          # Pytest configuration
+├── requirements.txt    # Project dependencies
+└── README.md          # Project documentation
 ```
 
 ## Setup
@@ -44,7 +69,7 @@ pip install -r requirements.txt
 
 3. Run the tests:
 ```bash
-pytest
+pytest --cov=app --cov-report=term-missing
 ```
 
 4. Start the server:
@@ -61,14 +86,26 @@ Once running, visit:
 ## Available Endpoints
 
 ### System
-- `GET /api/v1/system/health` - Health check
-- `GET /api/v1/system/config` - System configuration
+- `GET /api/v1/system/health` - Health check endpoint
+  - Returns service status and uptime
+- `GET /api/v1/system/config` - Configuration endpoint
+  - Returns non-sensitive configuration settings
 
 ### Users
 - `GET /api/v1/users/` - List all users
 - `POST /api/v1/users/` - Create new user
+  - Validates email format
+  - Prevents duplicate emails
+  - Returns created user with ID
 
 ## Testing
+
+The project includes a comprehensive test suite:
+
+- Unit tests for all components
+- Integration tests for API endpoints
+- 100% code coverage requirement
+- Automated testing on multiple Python versions (3.9, 3.10, 3.11)
 
 Run tests with coverage:
 ```bash
@@ -76,6 +113,15 @@ pytest --cov=app --cov-report=html
 ```
 
 View coverage report in `coverage_html/index.html`
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration:
+
+- Automated testing on push and pull requests
+- Multiple Python version testing
+- Code coverage reporting to Codecov
+- Status badges in README
 
 ## Contributing
 
