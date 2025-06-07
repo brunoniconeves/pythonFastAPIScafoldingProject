@@ -56,6 +56,8 @@ A well-structured FastAPI microservice with proper configuration management, dat
 
 ## Setup
 
+### Local Development
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/brunoniconeves/pythonFastAPIScafoldingProject.git
@@ -76,6 +78,32 @@ pytest --cov=app --cov-report=term-missing
 ```bash
 uvicorn app.main:app --reload
 ```
+
+### Docker Setup
+
+1. Build and start the container:
+```bash
+docker-compose up --build
+```
+
+2. Or run with Docker directly:
+```bash
+# Build the image
+docker build -t fastapi-microservice .
+
+# Run the container
+docker run -p 8000:8000 -v $(pwd)/data:/app/data fastapi-microservice
+```
+
+The API will be available at http://localhost:8000
+
+#### Docker Features
+- Multi-stage build for minimal image size
+- Non-root user for security
+- Volume mounting for persistent data
+- Health checks
+- Automatic restarts
+- Environment variable configuration
 
 ## API Documentation
 
