@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
+from sqlalchemy.orm import Session
 from app.schemas import User, UserCreate
-from app.services import user_service
+from app.services.user_service import UserService
+from app.db import get_db
 
 router = APIRouter(
     prefix="/users",
@@ -16,6 +18,10 @@ router = APIRouter(
     }
 )
 
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Dependency to get UserService instance."""
+    return UserService(db=db)
+
 @router.get(
     "/",
     response_model=List[User],
@@ -24,7 +30,7 @@ router = APIRouter(
     description="Retrieve a list of all registered users in the system.",
     response_description="List of users with their details."
 )
-def get_users():
+def get_users(service: UserService = Depends(get_user_service)):
     """
     Retrieve all users from the database.
     
@@ -36,7 +42,7 @@ def get_users():
     
     The list will be empty if no users are registered.
     """
-    return user_service.get_all_users()
+    return service.get_all_users()
 
 @router.post(
     "/",
@@ -46,7 +52,10 @@ def get_users():
     description="Create a new user in the system.",
     response_description="The created user's details."
 )
-def create_user(user: UserCreate):
+def create_user(
+    user: UserCreate,
+    service: UserService = Depends(get_user_service)
+):
     """
     Create a new user.
     
@@ -64,7 +73,7 @@ def create_user(user: UserCreate):
     - HTTP 409: If the email is already registered
     """
     try:
-        return user_service.create_user(user)
+        return service.create_user(user)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

@@ -47,11 +47,18 @@ A well-structured FastAPI microservice with proper configuration management, dat
 │   ├── versions/        # Migration versions
 │   └── env.py          # Alembic configuration
 ├── tests/               # Test suite
-│   ├── test_config.py   # Configuration tests
-│   ├── test_health.py   # Health check endpoint tests
-│   ├── test_repositories.py  # Repository layer tests
-│   ├── test_services.py     # Service layer tests
-│   └── test_users.py        # User endpoints tests
+│   ├── core/           # Core functionality tests
+│   │   └── test_config.py
+│   ├── models/         # Model tests
+│   ├── repositories/   # Repository layer tests
+│   │   └── test_user_repository.py
+│   ├── routers/        # API endpoint tests
+│   │   ├── test_health.py
+│   │   └── test_users.py
+│   ├── services/       # Service layer tests
+│   │   └── test_user_service.py
+│   ├── conftest.py     # Test configuration and fixtures
+│   └── __init__.py
 ├── scripts/             # Utility scripts
 │   └── init.sh         # Container initialization script
 ├── .coveragerc          # Coverage configuration

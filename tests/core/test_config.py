@@ -1,14 +1,14 @@
 from fastapi import status
 from app.core.config import settings
 
-def test_get_config(test_app):
+def test_get_config(client):
     """
     Test the config endpoint returns:
     - 200 status code
     - Correct response structure
     - Valid settings values
     """
-    response = test_app.get(f"{settings.API_V1_STR}/system/config")
+    response = client.get(f"{settings.API_V1_STR}/system/config")
     
     # Check status code
     assert response.status_code == status.HTTP_200_OK
@@ -27,32 +27,32 @@ def test_get_config(test_app):
     assert current_settings["project_name"] == settings.PROJECT_NAME
     assert current_settings["database_url"] == settings.DATABASE_URL
 
-def test_config_response_headers(test_app):
+def test_config_response_headers(client):
     """
     Test that the config endpoint returns proper headers:
     - Content-Type: application/json
     """
-    response = test_app.get(f"{settings.API_V1_STR}/system/config")
+    response = client.get(f"{settings.API_V1_STR}/system/config")
     assert response.headers["content-type"] == "application/json"
 
-def test_config_env_file_contents(test_app, tmp_path):
+def test_config_env_file_contents(client, tmp_path):
     """
     Test that the config endpoint correctly reports .env file status
     and contents when no .env file exists
     """
-    response = test_app.get(f"{settings.API_V1_STR}/system/config")
+    response = client.get(f"{settings.API_V1_STR}/system/config")
     data = response.json()
     
     # Since we're in a test environment, there might not be a .env file
     if not data["env_file_exists"]:
         assert data["env_file_contents"] == {}
 
-def test_config_with_env_file(test_app, test_env_file):
+def test_config_with_env_file(client, test_env_file):
     """
     Test that the config endpoint correctly reads and reports
     the contents of a .env file when one exists
     """
-    response = test_app.get(f"{settings.API_V1_STR}/system/config")
+    response = client.get(f"{settings.API_V1_STR}/system/config")
     data = response.json()
     
     # Check that the .env file was detected
@@ -66,6 +66,6 @@ def test_config_with_env_file(test_app, test_env_file):
     assert "VERSION" in env_contents
     
     # Check specific values
-    assert env_contents["PROJECT_NAME"] == "Test FastAPI Project"
-    assert env_contents["DATABASE_URL"] == "sqlite:///./test_db.db"
-    assert env_contents["VERSION"] == "0.1.0-test" 
+    assert env_contents["PROJECT_NAME"] == "FastAPI Microservice"
+    assert env_contents["DATABASE_URL"] == "sqlite:///./test.db"
+    assert env_contents["VERSION"] == "0.2.0" 
