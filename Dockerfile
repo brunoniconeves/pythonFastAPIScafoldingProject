@@ -33,6 +33,7 @@ RUN pip install --no-cache /wheels/*
 
 # Copy application code and initialization script
 COPY app app/
+COPY alembic alembic/
 COPY alembic.ini .
 COPY scripts/init.sh .
 
