@@ -11,6 +11,7 @@ services:
       - DATABASE_URL=sqlite:///./data/app.db
       - ENVIRONMENT=production
       - DEBUG=false
+    user: "1000:1000"  # Match the appuser UID:GID
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/system/health"]
       interval: 30s

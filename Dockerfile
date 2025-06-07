@@ -22,16 +22,24 @@ RUN useradd -m -u 1000 appuser
 # Set working directory
 WORKDIR /app
 
-# Install runtime dependencies
+# Install runtime dependencies and curl for healthcheck
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache /wheels/*
 
-# Copy application code
+# Copy application code and initialization script
 COPY app app/
 COPY alembic.ini .
+COPY scripts/init.sh .
 
-# Set ownership to non-root user
-RUN chown -R appuser:appuser /app
+# Create data directory and set permissions
+RUN mkdir -p /app/data && \
+    chown -R appuser:appuser /app && \
+    chmod +x /app/init.sh
 
 # Switch to non-root user
 USER appuser
@@ -43,5 +51,5 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# Run migrations and start application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Run initialization script
+CMD ["/app/init.sh"] 
