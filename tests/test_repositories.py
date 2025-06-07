@@ -152,10 +152,19 @@ def test_base_repository_delete(test_db):
     
     session.close()
 
-def test_create_user(session: Session):
+def test_create_user(test_db):
     user = User(
         name="Test User",
         email="test@example.com",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
-    ) 
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+    
+    assert user.id is not None
+    assert user.name == "Test User"
+    assert user.email == "test@example.com"
+    assert user.created_at is not None
+    assert user.updated_at is not None 
