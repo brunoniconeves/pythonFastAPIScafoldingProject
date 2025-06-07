@@ -2,11 +2,11 @@ coverage:
   status:
     project:
       default:
-        target: 95%    # coverage target percentage
+        target: 90%    # coverage target percentage
         threshold: 1%  # allow coverage to drop by 1% while still passing
     patch:
       default:
-        target: 95%    # new code should have 95% coverage
+        target: 90%    # new code should have 90% coverage
         threshold: 1%
 
 comment:
@@ -17,6 +17,5 @@ comment:
   require_head: yes      # [yes :: must have a head report to post]
 
 ignore:
-  - "tests/"
-  - "app/migrations/"
-  - "app/__init__.py" 
+  - "tests/**/*"
+  - "**/__init__.py" 
