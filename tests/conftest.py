@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -99,4 +100,13 @@ def test_env_file(tmp_path):
     """
     env_file = tmp_path / ".env"
     env_file.write_text(env_content)
-    return env_file
+
+    # Create a copy in the current directory for the system router to find
+    current_dir_env = Path(".env")
+    current_dir_env.write_text(env_content)
+
+    yield env_file
+
+    # Clean up the current directory .env file
+    if current_dir_env.exists():
+        current_dir_env.unlink()
