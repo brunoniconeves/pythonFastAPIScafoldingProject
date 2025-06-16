@@ -1,76 +1,93 @@
-import pytest
+import uuid
 from datetime import datetime, timezone
-from typing import Generator
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
-from app.main import app
 from app.db import Base, get_db
+from app.main import app
 from app.models.user import User
 
-# Test database URL
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
-# Create test database engine
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_database():
-    """Create test database tables."""
+def unique_email() -> str:
+    """Generate a unique email address for testing."""
+    return f"test_{uuid.uuid4().hex[:8]}@example.com"
+
+
+@pytest.fixture(scope="session")
+def engine():
+    """Create a test database engine and create all tables."""
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,  # Ensures all connections share the same in-memory DB
+    )
+    # Create all tables
     Base.metadata.create_all(bind=engine)
-    yield
+    yield engine
+    # Drop all tables after tests
     Base.metadata.drop_all(bind=engine)
 
-@pytest.fixture
-def db() -> Generator[Session, None, None]:
-    """Fixture that provides a database session."""
+
+@pytest.fixture(scope="session")
+def connection(engine):
+    """Create a connection to the test database."""
     connection = engine.connect()
-    transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
-    
-    yield session
-    
-    session.close()
-    transaction.rollback()
+    yield connection
     connection.close()
 
-@pytest.fixture
-def client(db: Session) -> TestClient:
-    """Fixture that provides a FastAPI TestClient."""
+
+@pytest.fixture(scope="function")
+def db_session(connection):
+    """Create a new database session for a test."""
+    transaction = connection.begin()
+    session_maker = sessionmaker(bind=connection)
+    session = session_maker()
+    yield session
+    session.close()
+    transaction.rollback()
+
+
+@pytest.fixture(scope="function")
+def client(db_session):
+    """Create a test client with a database session."""
+
     def override_get_db():
-        try:
-            yield db
-        finally:
-            pass
-    
+        yield db_session
+
     app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
+    with TestClient(app) as c:
+        yield c
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def sample_user_data():
     """Fixture that provides sample user data."""
     return {
         "name": "Test User",
-        "email": "test@example.com"
+        "email": unique_email(),
     }
 
+
 @pytest.fixture
-def test_user(db: Session, sample_user_data) -> User:
+def test_user(db_session: Session, sample_user_data) -> User:
     """Fixture that provides a test user in the database."""
     user = User(
         **sample_user_data,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
     return user
+
 
 @pytest.fixture
 def test_env_file(tmp_path):
@@ -82,4 +99,4 @@ def test_env_file(tmp_path):
     """
     env_file = tmp_path / ".env"
     env_file.write_text(env_content)
-    return env_file 
+    return env_file

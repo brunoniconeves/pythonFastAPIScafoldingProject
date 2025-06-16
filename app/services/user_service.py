@@ -1,7 +1,10 @@
-from sqlalchemy.orm import Session
 from typing import List
-from app.schemas.user import UserCreate, UserUpdate, User
+
+from sqlalchemy.orm import Session
+
 from app.repositories.user_repository import UserRepository
+from app.schemas.user import User, UserCreate, UserUpdate
+
 
 class UserService:
     """Service for handling user-related operations."""

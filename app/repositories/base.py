@@ -1,11 +1,14 @@
-from typing import Generic, TypeVar, Type, Optional, List
-from sqlalchemy.orm import Session
+from typing import Generic, List, Optional, Type, TypeVar
+
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from app.db import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+
 
 class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType], db: Session):
@@ -40,4 +43,4 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             self.db.delete(db_obj)
             self.db.commit()
             return True
-        return False 
+        return False

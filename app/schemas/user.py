@@ -1,6 +1,8 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr
+
 
 class UserBase(BaseModel):
     name: str
@@ -8,14 +10,17 @@ class UserBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserCreate(UserBase):
     pass
+
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class User(UserBase):
     id: int
@@ -28,7 +33,7 @@ class User(UserBase):
                 "id": 1,
                 "name": "John Doe",
                 "email": "john@example.com",
-                "created_at": "2024-01-01T00:00:00"
+                "created_at": "2024-01-01T00:00:00",
             }
-        }
+        },
     )
